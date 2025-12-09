@@ -4,6 +4,7 @@ compile_commands.json
 # Directories
 build/
 .cache/
+.backup/
 
 # Prerequisites
 *.d
