@@ -3,24 +3,24 @@
 #include <util/log.h>
 #include <stdlib.h>
 
-extern void* InitPlatformWindow(int width, int height, const char* title);
-extern void DestroyPlatformWindow(void* window);
-extern int PlatformWindowShouldClose(void* window);
+extern void* _init_platform_window(int width, int height, const char* title);
+extern void _destroy_platform_window(void* window);
+extern int _platform_window_should_close(void* window);
 
-typedef struct Window {
+typedef struct rt_window_t {
 	void* handle;
 	const char* title;
 	int width;
 	int height;
-} Window;
+} rt_window_t;
 
-Window* InitWindow(int width, int height, const char* title) 
+rt_window_t* rt_init_window(int width, int height, const char* title) 
 {
 	// Initialize a window for a given platform
-	void* handle = InitPlatformWindow(width, height, title);
+	void* handle = _init_platform_window(width, height, title);
 
 	// Construct window object
-	Window* win = malloc(sizeof(Window));
+	rt_window_t* win = malloc(sizeof(rt_window_t));
 	win->width = width;
 	win->height = height;
 	win->title = title;
@@ -29,18 +29,18 @@ Window* InitWindow(int width, int height, const char* title)
 	return win;
 }
 
-void DestroyWindow(Window* window) 
+void rt_destroy_window(rt_window_t* window) 
 {
 	if (window->handle == NULL) {
 		return;
 	}
 
-	DestroyPlatformWindow(window->handle);
+	_destroy_platform_window(window->handle);
 
 	free(window);
 }
 
-bool WindowShouldClose(Window *window)
+bool rt_window_should_close(rt_window_t *window)
 {
-	return (bool)PlatformWindowShouldClose(window->handle);	
+	return (bool)_platform_window_should_close(window->handle);	
 }

@@ -1,6 +1,6 @@
 #define LOG_IMPL
 #include <util/log.h>
-#include <gfx/gfx.h>
+#include <gfx/rgl.h>
 #include <core/window.h>
 
 #include <stdio.h>
@@ -12,15 +12,15 @@
 int main(void) 
 {
     //-- Window
-    Window* window = InitWindow(WIN_INIT_WIDTH, WIN_INIT_HEIGHT, WIN_INIT_TITLE);
+    rt_window_t* window = rt_init_window(WIN_INIT_WIDTH, WIN_INIT_HEIGHT, WIN_INIT_TITLE);
 
     //--Main Loop
-    while (!WindowShouldClose(window)) {
+    while (!rt_window_should_close(window)) {
         //--Render Loop
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
     //--Cleanup
-    DestroyWindow(window);
+    rt_destroy_window(window);
     return 0;
 }

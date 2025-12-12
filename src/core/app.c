@@ -1,6 +1,6 @@
 #include "app.h"
 
-void InitApplication(const char* title) 
+void rt_init_application(const char* title) 
 {
 
 }

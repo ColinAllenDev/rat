@@ -6,6 +6,7 @@ include util.mk
 # Compiler & Linker
 CC := clang
 STD := c11
+LIB_EXT := .so
 
 # Project Structure
 BIN := rat
@@ -23,18 +24,40 @@ LIBS := $(addprefix -L,$(shell find $(LIB_DIR) -type d))
 OBJS = $(SRCS:$(SRC_DIR)/%.c=$(TARGET_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
 
+# Third Party Libraries
+L_GL := -lGL -lEGL
+L_WAYLAND_GL := lwayland-egl -lwayland-client -lm
+L_GLFW := -lglfw -lrt -lm -ldl
+
 # Flags
 CFLAGS := -std=$(STD)
 CPPFLAGS := $(INCS) -I$(INC_DIR) -MMD -MP
-LDFLAGS := $(LIBS) -lglfw3
+LDFLAGS := $(LIBS)
 
 # Platform Specific Configuration
 UNAME := $(shell uname 2>/dev/null || echo Unknown)
-ifeq ($(UNAME),Darwin) ## MacOS
-	LDFLAGS += -framework Cocoa -framework OpenGL -framework IOKit 
+## MacOS
+ifeq ($(UNAME),Darwin) 
+	L_GLFW = -lglfw
+	L_GL := -framework Cocoa -framework OpenGL -framework IOKit
 	CFLAGS += -DGL_SILENCE_DEPRECATION
+	LIB_EXT = .dylib
 	export MallocNanoZone=0
 endif
+## Linux
+ifeq ($(UNAME),Linux)
+SESSION := $(XDG_SESSION_TYPE)
+	ifeq ($(XDG_SESSION_TYPE),wayland)  
+		## Wayland
+		LDFLAGS += $(L_WAYLAND_GL)	
+	else ifeq ($(XDG_SESSION_TYPE),x11)
+		## X11
+	else
+		## Unknown
+	endif
+endif
+
+LDFLAGS += $(L_GL) $(L_GLFW)
 
 #-- all: Default Build Target
 .PHONY: all
@@ -49,13 +72,13 @@ debug: LDFLAGS += $(SF_ADDR) $(SF_FRAME)
 debug: TARGET := debug
 debug: $(TARGET_DIR)/$(BIN)
 
-#-- Clean: Remove build artifacts
+#-- clean: Remove build artifacts
 .PHONY: clean
 clean: 
 	@echo "Removing build artifacts..."
 	@rm -rf $(BUILD_DIR)
 
-#-- Run: Execute built binary
+#-- run: Execute built binary
 .PHONY: run
 run:
 	@if [ -f $(TARGET_DIR)/$(BIN) ]; then \
@@ -65,7 +88,7 @@ run:
 		./$(TARGET_DIR)/$(BIN); \
 	fi
 
-#-- Bear: Generate compilation database
+#-- bear: Generate compilation database
 .PHONY: bear
 bear: clean
 	@echo "Generating compile_commands.json with bear..."

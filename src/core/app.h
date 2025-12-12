@@ -1,6 +1,6 @@
 #ifndef RAT_APP_H
 #define RAT_APP_H
 
-void InitApplication(const char* title);
+void rt_init_application(const char* title);
 
 #endif

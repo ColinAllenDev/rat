@@ -46,7 +46,7 @@
 typedef enum { trace, debug, info, warn, error, fatal } log_level;
 
 //--Public Function Macros
-#define Log(level, ...) _log(level, __VA_ARGS__) 
+#define rt_log(level, ...) _log(level, __VA_ARGS__) 
 
 //--Internal Logging Function
 void _log(log_level level, const char* fmt, ...);
