@@ -3,10 +3,11 @@
 
 #include <stdbool.h>
 
-typedef struct rt_window_t rt_window_t;
+typedef struct rt_window rt_window;
 
-rt_window_t* rt_init_window(int width, int height, const char* title);
-void rt_destroy_window(rt_window_t* window);
-bool rt_window_should_close(rt_window_t* window);
+rt_window* rt_init_window(int width, int height, const char* title);
+void* rt_get_window_context(void);
+void rt_destroy_window(rt_window* window);
+bool rt_window_should_close(rt_window* window);
 
 #endif /* RAT_WINDOW_H */

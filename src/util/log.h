@@ -1,9 +1,6 @@
-#ifndef LOG_H
-#define LOG_H
+#ifndef RAT_LOG_H
+#define RAT_LOG_H
 
-#include <stdio.h>
-#include <stdarg.h>
-#include <time.h>
 
 // ANSI Colors
 #define ANSI_RED     "\x1b[31m"
@@ -51,10 +48,14 @@ typedef enum { trace, debug, info, warn, error, fatal } log_level;
 //--Internal Logging Function
 void _log(log_level level, const char* fmt, ...);
 
-#endif /* LOG_H */
-#ifdef LOG_IMPL
+#endif /* RAT_LOG_H */
+#ifdef RAT_LOG_IMPLEMENTATION
 
-static const char* level_colors[] = {
+#include <stdio.h>
+#include <stdarg.h>
+#include <time.h>
+
+static const char* rt_level_colors[] = {
 	LOG_LEVEL_TRACE_COLOR, 
 	LOG_LEVEL_DEBUG_COLOR, 
 	LOG_LEVEL_INFO_COLOR, 
@@ -63,7 +64,7 @@ static const char* level_colors[] = {
 	LOG_LEVEL_FATAL_COLOR,
 };
 
-static const char* level_strings[] = {
+static const char* rt_level_strings[] = {
 	LOG_LEVEL_TRACE_STR, 
 	LOG_LEVEL_DEBUG_STR, 
 	LOG_LEVEL_INFO_STR, 
@@ -85,7 +86,7 @@ void _log(log_level level, const char* fmt, ...) {
 		// Message Prefix	
 		FILE* stream = (level == error) ? stderr : stdout;
 		fprintf(stream, "%s %s%-5s\x1b[0m \x1b[90m%s:%d:\x1b[0m ",
-		  		tmBuf, level_colors[level], level_strings[level], 
+		  		tmBuf, rt_level_colors[level], rt_level_strings[level], 
 		  		__FILE__, __LINE__);
 		// Message
 		va_list args;
@@ -97,4 +98,4 @@ void _log(log_level level, const char* fmt, ...) {
 	}
 }
 
-#endif /* LOG_IMPL */
+#endif /* RAT_LOG_IMPL */

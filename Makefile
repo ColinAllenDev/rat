@@ -26,8 +26,12 @@ DEPS := $(OBJS:.o=.d)
 
 # Third Party Libraries
 L_GL := -lGL -lEGL
-L_WAYLAND_GL := lwayland-egl -lwayland-client -lm
+#L_WAYLAND_GL := lwayland-egl -lwayland-client -lm
 L_GLFW := -lglfw -lrt -lm -ldl
+L_VALGRIND := -L/usr/lib/valgrind -lcoregrind-amd64-linux -lvex-amd64-linux -lgcc
+
+# Third Party Headers
+I_VALGRIND := -I/usr/lib/valgrind
 
 # Flags
 CFLAGS := -std=$(STD)
@@ -49,7 +53,7 @@ ifeq ($(UNAME),Linux)
 SESSION := $(XDG_SESSION_TYPE)
 	ifeq ($(XDG_SESSION_TYPE),wayland)  
 		## Wayland
-		LDFLAGS += $(L_WAYLAND_GL)	
+		## LDFLAGS += $(L_WAYLAND_GL)	
 	else ifeq ($(XDG_SESSION_TYPE),x11)
 		## X11
 	else
@@ -57,7 +61,9 @@ SESSION := $(XDG_SESSION_TYPE)
 	endif
 endif
 
-LDFLAGS += $(L_GL) $(L_GLFW)
+LDFLAGS += $(L_GL) $(L_GLFW) 
+#LDFLAGS += $(L_GL) $(L_GLFW) $(L_VALGRIND) 
+#CPPFLAGS += $(I_VALGRIND)
 
 #-- all: Default Build Target
 .PHONY: all

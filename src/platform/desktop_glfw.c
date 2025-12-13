@@ -4,7 +4,6 @@
 #include <stdbool.h>
 
 #define GLFW_INCLUDE_NONE
-#include <glad/gl.h>
 #include <GLFW/glfw3.h>
 
 /* Windows specific configuration */
@@ -23,13 +22,13 @@
 #endif
 
 /* Constructs a GLFW window */
-void* _init_platform_window(int width, int height, const char* title); 
+void* ext_init_window(int width, int height, const char* title); 
 
 /* Deconstructs a GLFW window */
-void _destroy_platform_window(void* window); 
+void ext_destroy_window(void* window); 
 
 /* Returns the close flag of the specified window */
-bool _platform_window_should_close(void* window);
+bool ext_window_should_close(void* window);
 
 /* GLFW error callback */
 static void glfw_error_callback(int error, const char* description);
@@ -38,7 +37,7 @@ static void glfw_error_callback(int error, const char* description);
 static void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 /* Implementation */
-void* _init_platform_window(int width, int height, const char* title)
+void* ext_init_window(int width, int height, const char* title)
 {
 	/* Initialize GLFW */
 	glfwSetErrorCallback(glfw_error_callback);	
@@ -51,9 +50,11 @@ void* _init_platform_window(int width, int height, const char* title)
 		return NULL;
 	}
 
-	/* -- GLFW Window Hints */
-	/* Reset window hints to defaults */
-	glfwDefaultWindowHints();
+	/* GLFW Window Hints */
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
     /* Antialiasing (Performance: 4, Quality: 16) */
     glfwWindowHint(GLFW_SAMPLES, 4);
 
@@ -71,11 +72,6 @@ void* _init_platform_window(int width, int height, const char* title)
 		return NULL;
 	}
 
-	/* -- GLAD - Load OpenGL Extensions */
-	if (gladLoadGL(glfwGetProcAddress) == 0) {
-		return NULL;
-	}
-
 	/* -- GLFW - Window Configuration */
 	/* Disable V-Sync by default */
 	glfwSwapInterval(0);
@@ -86,12 +82,21 @@ void* _init_platform_window(int width, int height, const char* title)
 	return window;
 }
 
-void _destroy_platform_window(void* window) {
+void* ext_get_window_context(void) 
+{
+	if (glfwGetCurrentContext() == NULL) {
+		return NULL;
+	}
+	return NULL;
+}
+
+void ext_destroy_window(void* window) 
+{
 	glfwDestroyWindow(window);
 	glfwTerminate();
 }
 
-bool _platform_window_should_close(void* window)
+bool ext_window_should_close(void* window)
 {
 	return glfwWindowShouldClose(window);
 }
