@@ -26,8 +26,7 @@ DEPS := $(OBJS:.o=.d)
 
 # Third Party Libraries
 L_GL := -lGL -lEGL
-#L_WAYLAND_GL := lwayland-egl -lwayland-client -lm
-L_GLFW := -lglfw -lrt -lm -ldl
+L_GLFW := -lglfw3
 L_VALGRIND := -L/usr/lib/valgrind -lcoregrind-amd64-linux -lvex-amd64-linux -lgcc
 
 # Third Party Headers
@@ -42,7 +41,7 @@ LDFLAGS := $(LIBS)
 UNAME := $(shell uname 2>/dev/null || echo Unknown)
 ## MacOS
 ifeq ($(UNAME),Darwin) 
-	L_GLFW = -lglfw
+	L_GLFW = -lglfw3
 	L_GL := -framework Cocoa -framework OpenGL -framework IOKit
 	CFLAGS += -DGL_SILENCE_DEPRECATION
 	LIB_EXT = .dylib

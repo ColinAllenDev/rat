@@ -27,6 +27,9 @@ void* ext_init_window(int width, int height, const char* title);
 /* Deconstructs a GLFW window */
 void ext_destroy_window(void* window); 
 
+/* Draw the window */
+void ext_draw_window(void* window);
+
 /* Returns the close flag of the specified window */
 bool ext_window_should_close(void* window);
 
@@ -94,6 +97,12 @@ void ext_destroy_window(void* window)
 {
 	glfwDestroyWindow(window);
 	glfwTerminate();
+}
+
+void ext_draw_window(void* window)
+{
+	glfwSwapBuffers(window);
+	glfwPollEvents();
 }
 
 bool ext_window_should_close(void* window)
