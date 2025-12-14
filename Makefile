@@ -6,7 +6,6 @@ include util.mk
 # Compiler & Linker
 CC := clang
 STD := c11
-LIB_EXT := .so
 
 # Project Structure
 BIN := rat
@@ -25,12 +24,13 @@ OBJS = $(SRCS:$(SRC_DIR)/%.c=$(TARGET_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
 
 # Third Party Libraries
+LIB_EXT := .so
 L_GL := -lGL -lEGL
 L_GLFW := -lglfw3
-L_VALGRIND := -L/usr/lib/valgrind -lcoregrind-amd64-linux -lvex-amd64-linux -lgcc
+L_VALGRIND := -L/usr/lib/valgrind
 
 # Third Party Headers
-I_VALGRIND := -I/usr/lib/valgrind
+I_VALGRIND := -I/usr/include/valgrind
 
 # Flags
 CFLAGS := -std=$(STD)
@@ -51,18 +51,14 @@ endif
 ifeq ($(UNAME),Linux)
 SESSION := $(XDG_SESSION_TYPE)
 	ifeq ($(XDG_SESSION_TYPE),wayland)  
-		## Wayland
-		## LDFLAGS += $(L_WAYLAND_GL)	
 	else ifeq ($(XDG_SESSION_TYPE),x11)
-		## X11
-	else
-		## Unknown
 	endif
+
+export PKG_CONFIG_PATH=/usr/lib/pkgconfig/
 endif
 
-LDFLAGS += $(L_GL) $(L_GLFW) 
-#LDFLAGS += $(L_GL) $(L_GLFW) $(L_VALGRIND) 
-#CPPFLAGS += $(I_VALGRIND)
+LDFLAGS += $(L_GL) $(L_GLFW) $(L_VALGRIND) 
+CPPFLAGS += $(I_VALGRIND)
 
 #-- all: Default Build Target
 .PHONY: all

@@ -56,8 +56,6 @@ int main(void)
         /* Clear frame */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        
-
         /* Use shader */
         glUseProgram(shader);
         
@@ -74,7 +72,8 @@ int main(void)
         rt_draw_window(window);
     }
 
-    /* --Cleanup */
+    /* Cleanup */    
     rt_destroy_window(window);
-    return EXIT_SUCCESS;
+
+    return 0;
 }

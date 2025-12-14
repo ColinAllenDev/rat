@@ -20,59 +20,58 @@ int rgl_init(void)
 uint32_t rgl_load_shader(const char* vs_path, const char* fs_path) 
 {
 	/* Read shader sources from files */
-	char* vs_source = NULL;
-	char* fs_src = NULL;
+	char* vs_src = rt_read_file(vs_path);
+	char* fs_src = rt_read_file(fs_path);
+	if ((vs_src == NULL) && (fs_src == NULL)) {
+		rt_log(error, "failed to load shader files");
 
-	vs_source = rt_read_file(vs_path);
-	fs_src = rt_read_file(fs_path);
-
-	/* In case of failure, fallback to default shader */
-	if ((vs_source == NULL) && (fs_src == NULL)) {
-		/* TODO: FALLBACK SHADER */
-		/* TODO: FILE ASSERT WITH ERROR MESSAGE */
-		rt_log(warn, "failed to load shader files");
+		free(vs_src);
+		free(fs_src);
 		return 0;
 	}
 
-	return rgl_init_shader(vs_source, fs_src);
+	/* Initialize shader program */
+	uint32_t sp_id = rgl_init_shader(vs_src, fs_src);
+	if (sp_id == 0) {
+		rt_log(error, "failed to initialize shader");
+	}
+
+	/* Cleanup */
+	free(vs_src);
+	free(fs_src);
+	return sp_id;
 }
 
-uint32_t rgl_init_shader(const char *vs_source, const char *fs_src) 
+uint32_t rgl_init_shader(const char *vs_src, const char *fs_src) 
 {
 	/* Compile Vertex Shader */
-	uint32_t vs_id = 0;
-	vs_id = compile_shader_source(vs_source, GL_VERTEX_SHADER);	
+	uint32_t vs_id = compile_shader_source(vs_src, GL_VERTEX_SHADER);	
 	if (vs_id == 0) {
-		rt_log(warn, "vertex shader failed to compile");	
+		rt_log(error, "vertex shader failed to compile");	
+		return 0;
 	}
 
 	/* Compile Fragment Shader */
-	uint32_t fs_id = 0;
-	fs_id = compile_shader_source(fs_src, GL_FRAGMENT_SHADER);	
+	uint32_t fs_id = compile_shader_source(fs_src, GL_FRAGMENT_SHADER);	
 	if (fs_id == 0) {
-		rt_log(warn, "fragment shader failed to compile");	
+		rt_log(error, "fragment shader failed to compile");	
+		return 0;
 	}
 	
 	/* Compile Shader Program */
-	uint32_t sp_id = 0;
-	sp_id = compile_shader_program(vs_id, fs_id);
+	uint32_t sp_id = compile_shader_program(vs_id, fs_id);
 	if (sp_id == 0) {
-		rt_log(warn, "shader program failed to compile");	
+		rt_log(error, "shader program failed to compile");	
 		return 0;
 	}
 		
-	/* Clean source shaders */
 	/* Detach & delete vertex shader */
-	if (vs_id != 0) {
-		glDetachShader(sp_id, vs_id);	
-		glDeleteShader(vs_id);
-	}
+	glDetachShader(sp_id, vs_id);	
+	glDeleteShader(vs_id);
 
 	/* Detach & delete fragment shader */
-	if (fs_id != 1) {
-		glDetachShader(sp_id, fs_id);
-		glDeleteShader(fs_id);
-	}
+	glDetachShader(sp_id, fs_id);
+	glDeleteShader(fs_id);
 
 	return sp_id;
 }
@@ -97,7 +96,7 @@ static uint32_t compile_shader_source(const char* shader_src, GLenum shader_type
 	if (shader_id == 0) {
 		rt_log(error, "failed to create shader from source! %s", shader_src);
 		return 0;
-	}	
+	}
 
 	/* Compile shader */
 	glShaderSource(shader_id, 1, &shader_src, NULL);

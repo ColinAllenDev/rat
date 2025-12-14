@@ -1,0 +1,6 @@
+==75629== Memcheck, a memory error detector
+==75629== Copyright (C) 2002-2024, and GNU GPL'd, by Julian Seward et al.
+==75629== Using Valgrind-3.25.1 and LibVEX; rerun with -h for copyright info
+==75629== Command: ./build/debug/rat
+==75629== Parent PID: 69794
+==75629== 

@@ -118,10 +118,10 @@ static void glfw_error_callback(int err, const char* description)
 /* GLFW - Keyboard Callback */
 static void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+	/* Debug log */
+	rt_log(debug, "GLFW Key Event: (keycode: %i, scancode: %i, mods: %i)", key, scancode, mods);
+
     /* Close window callack (ESCAPE) */
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GLFW_TRUE);
-	
-	/* Debug log */
-	rt_log(debug, "GLFW Key Event: (keycode: %i, scancode: %i, mods: %i)", key, scancode, mods);
 }
