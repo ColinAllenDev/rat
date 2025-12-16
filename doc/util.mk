@@ -1,11 +1,7 @@
 # util.mk
 # Contains helper definitions for colors, sanitizer flags and diagnostic flags
 
-## Colors
-LOG_INFO 	= \x1b[32m[INFO]\x1b[0m 
-LOG_WARN 	= \x1b[33m[WARN]\x1b[0m
-LOG_DEBUG 	= \x1b[34m[DEBUG]\x1b[0m 
-LOG_FATAL 	= \x1b[31m[FATAL]\x1b[0m
+
 
 ## Strict language conformance flags
 # -pedantic enables all warnings demanded by strict ISO C compliance

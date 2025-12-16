@@ -73,6 +73,7 @@ static const char* rt_level_strings[] = {
 	LOG_LEVEL_FATAL_STR		
 };
 
+__attribute__((__format__ (__printf__, 2, 0)))
 void _log(log_level level, const char* fmt, ...) {
 	if (level >= LOG_MIN_LEVEL) {
 		// --Get Current Time

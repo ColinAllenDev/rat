@@ -4,7 +4,11 @@ compile_commands.json
 # Directories
 build/
 .cache/
+.claude/
 .backup/
+
+# AI Slop
+CLAUDE.md
 
 # Prerequisites
 *.d

@@ -1,7 +1,7 @@
 #include <gfx/rgl.h>
 #include <util/log.h>
 
-#include <stdbool.h>
+#include <stdint.h>
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -21,8 +21,14 @@
 	/* #include "GLFW/glfw3native.h" */
 #endif
 
+/* Initialize GLFW */
+int ext_init_platform(void);
+
+/* Terminate GLFW */
+void ext_terminate_platform(void);
+
 /* Constructs a GLFW window */
-void* ext_init_window(int width, int height, const char* title); 
+void* ext_create_window(int width, int height, const char* title); 
 
 /* Deconstructs a GLFW window */
 void ext_destroy_window(void* window); 
@@ -31,7 +37,11 @@ void ext_destroy_window(void* window);
 void ext_draw_window(void* window);
 
 /* Returns the close flag of the specified window */
-bool ext_window_should_close(void* window);
+int ext_window_should_close(void* window);
+
+/* Get framebuffer size */
+typedef struct ext_vec2 {int x; int y;} ext_vec2;
+ext_vec2 ext_get_framebuffer_size(void* window);
 
 /* GLFW error callback */
 static void glfw_error_callback(int error, const char* description);
@@ -39,8 +49,11 @@ static void glfw_error_callback(int error, const char* description);
 /* GLFW keyboard input callback */
 static void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-/* Implementation */
-void* ext_init_window(int width, int height, const char* title)
+/*
+ * Implementation 
+ */
+
+int ext_init_platform(void)
 {
 	/* Initialize GLFW */
 	glfwSetErrorCallback(glfw_error_callback);	
@@ -49,10 +62,22 @@ void* ext_init_window(int width, int height, const char* title)
 		glfwInitHint(GLFW_COCOA_CHDIR_RESOURCES, GLFW_FALSE);
 	#endif
 
-	if (glfwInit() == GLFW_FALSE) {
-		return NULL;
+	int status = glfwInit();
+	if (status == GLFW_FALSE) {
+		return 0;
 	}
 
+	return status;
+}
+
+
+void ext_terminate_platform(void)
+{
+	glfwTerminate();
+}
+
+void* ext_create_window(int width, int height, const char* title)
+{
 	/* GLFW Window Hints */
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -64,10 +89,9 @@ void* ext_init_window(int width, int height, const char* title)
 	/* -- GLFW - Window Creation */
 	GLFWwindow* window = glfwCreateWindow(width, height, title, NULL, NULL);
 	if (!window) {
-		glfwDestroyWindow(window);
-		glfwTerminate();
 		return NULL;
 	}
+
 	glfwMakeContextCurrent(window);
 
 	int glfwResult = glfwGetError(NULL);
@@ -105,11 +129,24 @@ void ext_draw_window(void* window)
 	glfwPollEvents();
 }
 
-bool ext_window_should_close(void* window)
+int ext_window_should_close(void* window)
 {
 	return glfwWindowShouldClose(window);
 }
 
+ext_vec2 ext_get_framebuffer_size(void* window) 
+{
+	ext_vec2 fb_size;
+	glfwGetFramebufferSize(window, &fb_size.x, &fb_size.y);
+	return fb_size;
+}
+
+double ext_get_time(void) 
+{
+	return glfwGetTime();	
+}
+
+/* GLFW - Error Callback */
 static void glfw_error_callback(int err, const char* description) 
 {
 	rt_log(error, "(GLFW | E%i): %s", err, description);	

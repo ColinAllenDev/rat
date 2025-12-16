@@ -9,6 +9,17 @@
 #define GLAD_GL_IMPLEMENTATION
 #include <glad/gl.h>
 
+GLenum rgl_params[] = {
+	#define X(name)name,
+	RGL_PARAM
+	#undef X
+}; 
+static const char* rgl_params_str[] = {
+	#define X(name)#name,
+	RGL_PARAM
+	#undef X
+};
+
 static uint32_t compile_shader_program(uint32_t vs_id, uint32_t fs_id);
 static uint32_t compile_shader_source(const char* shader_src, GLenum shader_type);
 
@@ -88,6 +99,16 @@ uint32_t rgl_reload_shader(uint32_t shader, const char *vs_path, const char *fs_
 	}
 }
 
+void rgl_log_params(void) 
+{
+	size_t num_params = sizeof(rgl_params) / sizeof(rgl_params[0]);
+	for (size_t i = 0; i < num_params; i++) {
+		int tmp = 0;
+		glGetIntegerv(rgl_params[i], &tmp);
+		rt_log(info, "%s %i", rgl_params_str[i], tmp);
+	}
+}
+
 /* Compile shader from source */
 static uint32_t compile_shader_source(const char* shader_src, GLenum shader_type)
 {
@@ -160,9 +181,10 @@ static uint32_t compile_shader_program(uint32_t vs_id, uint32_t fs_id)
 
 			/* Cleanup */
 			glDeleteProgram(sp_id);
-			return 0;
-		}
+			return 0; }
 	}
 
 	return sp_id;
 }
+
+
