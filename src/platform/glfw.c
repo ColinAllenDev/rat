@@ -56,9 +56,6 @@ static int glfw_init(void)
     /* Antialiasing (Performance: 4, Quality: 16) */
     glfwWindowHint(GLFW_SAMPLES, 4);
 
-	/* Disable V-Sync by default */
-	glfwSwapInterval(0);
-
 	return status;
 }
 

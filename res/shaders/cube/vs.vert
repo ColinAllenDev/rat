@@ -1,6 +1,8 @@
 #version 330 core
 
-uniform float u_time;
+uniform float uTime;
+uniform vec2 uResolution;
+
 out vec3 vertexColor;
 
 void main() {
@@ -52,8 +54,8 @@ void main() {
 
 	// == ROTATION ==
 	// We'll rotate around both Y and X axes for a nice tumbling effect
-    float angleY = u_time * 0.7;  // Rotate around Y axis
-    float angleX = u_time * 0.5;  // Rotate around X axis
+    float angleY = uTime * 0.7;  // Rotate around Y axis
+    float angleX = uTime * 0.5;  // Rotate around X axis
     
     // Rotation matrix around Y axis
     mat3 rotY = mat3(
