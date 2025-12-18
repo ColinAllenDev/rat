@@ -1,4 +1,5 @@
 #include "rgl.h"
+#include "rtlib.h"
 
 #include <core/io.h>
 #include <util/log.h>
@@ -25,7 +26,31 @@ static uint32_t compile_shader_source(const char* shader_src, GLenum shader_type
 
 int rgl_init(void) 
 {
-	return gladLoaderLoadGL();
+	/* Initialize OpenGL using GLAD */
+	int gl_version = gladLoaderLoadGL();	
+	if (gl_version == 0) {
+		return 0;
+	}
+	
+	/* Configure OpenGL */
+	/* Enable depth testing */
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
+    /* Enable back-face culling */
+    //glEnable(GL_CULL_FACE); 
+    //glCullFace(GL_BACK);    /* Cull back-facing triangles */
+    //glFrontFace(GL_CCW);    /* Counter-clockwise winding = front face */
+
+	/* Log OpenGL Info */
+	rt_log(debug, "OpenGL Version: %i", gl_version);
+	
+	return gl_version;
+}
+
+void rgl_terminate(void) 
+{
+	gladLoaderUnloadGL();
 }
 
 uint32_t rgl_load_shader(const char* vs_path, const char* fs_path) 
@@ -36,8 +61,8 @@ uint32_t rgl_load_shader(const char* vs_path, const char* fs_path)
 	if ((vs_src == NULL) && (fs_src == NULL)) {
 		rt_log(error, "failed to load shader files");
 
-		free(vs_src);
-		free(fs_src);
+		rt_free(vs_src);
+		rt_free(fs_src);
 		return 0;
 	}
 
@@ -48,8 +73,8 @@ uint32_t rgl_load_shader(const char* vs_path, const char* fs_path)
 	}
 
 	/* Cleanup */
-	free(vs_src);
-	free(fs_src);
+	rt_free(vs_src);
+	rt_free(fs_src);
 	return sp_id;
 }
 
@@ -58,14 +83,15 @@ uint32_t rgl_init_shader(const char *vs_src, const char *fs_src)
 	/* Compile Vertex Shader */
 	uint32_t vs_id = compile_shader_source(vs_src, GL_VERTEX_SHADER);	
 	if (vs_id == 0) {
-		rt_log(error, "vertex shader failed to compile");	
-		return 0;
+		rt_log(error, "vertex shader failed to compile");
 	}
 
 	/* Compile Fragment Shader */
 	uint32_t fs_id = compile_shader_source(fs_src, GL_FRAGMENT_SHADER);	
 	if (fs_id == 0) {
 		rt_log(error, "fragment shader failed to compile");	
+		glDeleteShader(vs_id);
+		glDeleteShader(fs_id);
 		return 0;
 	}
 	
@@ -73,6 +99,8 @@ uint32_t rgl_init_shader(const char *vs_src, const char *fs_src)
 	uint32_t sp_id = compile_shader_program(vs_id, fs_id);
 	if (sp_id == 0) {
 		rt_log(error, "shader program failed to compile");	
+		glDeleteShader(vs_id);
+		glDeleteShader(fs_id);
 		return 0;
 	}
 		
@@ -101,8 +129,7 @@ uint32_t rgl_reload_shader(uint32_t shader, const char *vs_path, const char *fs_
 
 void rgl_log_params(void) 
 {
-	size_t num_params = sizeof(rgl_params) / sizeof(rgl_params[0]);
-	for (size_t i = 0; i < num_params; i++) {
+	size_t num_params = sizeof(rgl_params) / sizeof(rgl_params[0]); for (size_t i = 0; i < num_params; i++) {
 		int tmp = 0;
 		glGetIntegerv(rgl_params[i], &tmp);
 		rt_log(info, "%s %i", rgl_params_str[i], tmp);

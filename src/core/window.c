@@ -7,7 +7,7 @@
 extern int ext_init_platform(void);
 extern void ext_terminate_platform(void);
 extern void* ext_create_window(int width, int height, const char* title);
-extern void ext_destroy_window(void* window);
+extern void ext_terminate_window(void* window);
 extern void ext_draw_window(void* window);
 extern int ext_window_should_close(void* window);
 extern rt_ivec2 ext_get_framebuffer_size(void* window);
@@ -31,13 +31,13 @@ rt_window* rt_create_window(int width, int height, const char* title)
 	return win;
 }
 
-void rt_destroy_window(void* window) 
+void rt_terminate_window(void* window) 
 {
 	if (window == NULL) {
 		return;
 	}
 
-	ext_destroy_window(window);
+	ext_terminate_window(window);
 }
 
 void rt_draw_window(void* window) {

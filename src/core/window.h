@@ -15,8 +15,8 @@ void rt_terminate_platform(void);
 /* Create a platform window */
 rt_window* rt_create_window(int width, int height, const char* title);
 
-/* Destroy a platform window */
-void rt_destroy_window(void* window);
+/* Terminate a platform window */
+void rt_terminate_window(void* window);
 
 /* Draw platform window */
 void rt_draw_window(void* window);

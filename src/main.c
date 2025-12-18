@@ -12,13 +12,11 @@
 #define WIN_INIT_HEIGHT 480
 #define WIN_INIT_TITLE "Rat"
 
-static const float clip_space_verticies[] = {
-    -1.0f, -1.0f,
-     1.0f, -1.0f,
-     1.0f,  1.0f,
-    -1.0f, -1.0f,
-     1.0f,  1.0f,
-    -1.0f,  1.0f
+static const float vertex_positions[] = {
+    -1,  1, 
+     1,  1,
+    -1, -1,
+     1, -1,
 };
 
 int main(void) 
@@ -34,6 +32,7 @@ int main(void)
     void* window = rt_create_window(WIN_INIT_WIDTH, WIN_INIT_HEIGHT, WIN_INIT_TITLE);
     if (window == NULL) {
         rt_log(fatal, "failed to create window");
+        rt_terminate_platform(); 
         exit(EXIT_FAILURE);
     }
 
@@ -41,31 +40,20 @@ int main(void)
     int gl_version = rgl_init();
     if (gl_version == 0) {
         rt_log(fatal, "failed to load OpenGL");
+        rt_terminate_platform();
+        rt_terminate_window(window);
         exit(EXIT_FAILURE);
     }
-    rt_log(info, "OpenGL Version: %i", gl_version);
-    rgl_log_params();
-
-    /* Configure graphics library */
-    /* Enable depth testing */
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-
-    /* Enable back-face culling */
-    glEnable(GL_CULL_FACE); 
-    glCullFace(GL_BACK);    /* Cull back-facing triangles */
-    glFrontFace(GL_CCW);    /* Counter-clockwise winding = front face */
-
+            
     /* Shaders */
     uint32_t shader = rgl_load_shader(
-        "res/shaders/gradient/vs.vert", 
-        "res/shaders/gradient/fs.frag"
+        "res/shaders/lavalamp/vs.vert", 
+        "res/shaders/lavalamp/fs.frag"
     );
     
     /* Uniforms */
     int resolution_loc = glGetUniformLocation(shader, "iResolution");
     int time_loc = glGetUniformLocation(shader, "iTime");
-    int mouse_loc = glGetUniformLocation(shader, "iMouse");
 
     /* Create and bind the vertex array object */
     uint32_t vao, vbo;
@@ -75,7 +63,7 @@ int main(void)
 
     /* Upload vertex data to GPU */
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(clip_space_verticies), clip_space_verticies, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_positions), vertex_positions, GL_STATIC_DRAW);
 
     /* Tell OpenGL how to interpret the vertex data 
      * (2 floats per vertex, starting at offset 0) */
@@ -99,8 +87,7 @@ int main(void)
         glUniform1f(time_loc, (float)glfwGetTime());
 
         // Draw cube
-        glBindVertexArray(vao);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
         /* Draw window */
         rt_draw_window(window);
@@ -110,7 +97,8 @@ int main(void)
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
     glDeleteProgram(shader);
-    rt_destroy_window(window);
+    rgl_terminate();
+    rt_terminate_window(window);
     rt_terminate_platform();
 
     return 0;

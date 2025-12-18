@@ -105,17 +105,9 @@ res_pool* res_pool_init(size_t pool_sz, size_t slot_sz)
         return NULL;
     }
 
-	/* Allocate memory for the structure representing head slots */
-	pool->slot_heads = malloc(sizeof(res_head));
-	if (pool->slot_heads == NULL) {
-		free(pool);
-		return NULL;
-	}
-    
     /* Allocate the array of pool slots, slots are free by default */
     res_slot* slot_arr = malloc(pool_sz * slot_sz);
     if (slot_arr == NULL) {
-		free(pool->slot_heads);
         free(pool);
         return NULL;
     }
@@ -163,6 +155,7 @@ bool res_expand(res_pool* pool, size_t num_slots)
 	/* Allocate memory for new slot list */
 	res_slot* slot_list = malloc(num_slots * pool->slot_sz);
 	if (slot_list == NULL) 
+		free(slot_head);
 		return false;
 
 	/* Write the addresses of the new slots into the current slot */

@@ -1,13 +1,12 @@
 #--- Makefile - Build configuration for Rat -#
 
 #--- Helper Variables -----------------------#
-LOG 	:= \e[1;35m[MAKE]\e[0m 
+LOG 	:= $(shell date -u +%H:%M:%S) \x1b[35m[MAKE]\x1b[0m 
 
 WARN_ALL := -Wall -Wextra -Wpedantic -Wformat=2 -Wno-unused-parameter -Wold-style-definition -Wredundant-decls -Wnested-externs -Wmissing-include-dirs -Wnull-dereference -Wuninitialized
 WARN_ERR := -Werror
 
 SAN_ADDR := -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls
-SAN_UNDEF := -fsanitize=undefined -fno-omit-frame-pointer -fno-optimize-sibling-calls
 #--------------------------------------------#
 
 # Compiler & Linker
@@ -62,6 +61,8 @@ SESSION := $(XDG_SESSION_TYPE)
 	endif
 
 export PKG_CONFIG_PATH=/usr/lib/pkgconfig/
+LSAN_OPTIONS := suppressions=.sanitignore
+export LSAN_OPTIONS
 endif
 
 #-- all: Default Build Target
@@ -70,6 +71,7 @@ all: debug
 
 #-- debug: Debug Build Target
 .PHONY: debug
+debug: 
 debug: CFLAGS += -g -O0 $(WARN_ALL) $(SAN_ADDR)
 debug: LDFLAGS += $(SAN_ADDR)
 debug: TARGET := debug

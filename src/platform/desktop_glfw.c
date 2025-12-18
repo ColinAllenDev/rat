@@ -31,7 +31,7 @@ void ext_terminate_platform(void);
 void* ext_create_window(int width, int height, const char* title); 
 
 /* Deconstructs a GLFW window */
-void ext_destroy_window(void* window); 
+void ext_terminate_window(void* window); 
 
 /* Draw the window */
 void ext_draw_window(void* window);
@@ -117,10 +117,9 @@ void* ext_get_window_context(void)
 	return NULL;
 }
 
-void ext_destroy_window(void* window) 
+void ext_terminate_window(void* window) 
 {
 	glfwDestroyWindow(window);
-	glfwTerminate();
 }
 
 void ext_draw_window(void* window)

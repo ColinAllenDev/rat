@@ -1,0 +1,6 @@
+lib/
+include/
+build/
+.cache/
+.git/
+.claude/

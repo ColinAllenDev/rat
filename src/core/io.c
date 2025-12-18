@@ -1,4 +1,5 @@
 #include "io.h"
+#include "rtlib.h"
 
 #include <util/log.h>
 #include <stdio.h>
@@ -30,7 +31,7 @@ char* rt_read_file(const char* file_path)
 	size_t resultSize = fread(buffer, 1, fileSize, file);
 	if (resultSize != fileSize) {
 		rt_log(error, "Failed to read file!\nExpected %zu, found %zu\n", fileSize, resultSize);
-		free(buffer);
+		rt_free(buffer);
 		fclose(file);
 		return NULL;
 	}

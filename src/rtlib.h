@@ -4,6 +4,6 @@
 /*
 ** Custom free() wrapper that prevents dangling pointers
 */
-#define rt_free(ptr) do { free(ptr); p = NULL; } while(0)
+#define rt_free(ptr) do { free(ptr); ptr = NULL; } while(0)
 
 #endif

@@ -1,0 +1,4 @@
+leak:libfontconfig
+leak:libwayland
+leak:libpangocairo
+leak:libglib

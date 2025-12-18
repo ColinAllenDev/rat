@@ -29,6 +29,11 @@
 */
 int rgl_init(void);
 
+/*
+** Terminate OpenGL
+*/
+void rgl_terminate(void);
+
 /* 
 ** Load shader from files and bind default locations
 */
@@ -43,6 +48,11 @@ uint32_t rgl_init_shader(const char* vs_src, const char* fs_src);
 ** Hot-reload shader program from source files 
 */
 uint32_t rgl_reload_shader(unsigned int shader, const char* vs_path, const char* fs_path);
+
+/*
+** Load model (currently just GLTF models supported)
+*/
+uint32_t rgl_load_model(const char* model_path);
 
 /* 
 ** Log parameters from GL context
