@@ -1,4 +1,5 @@
 #define RAT_LOG_IMPLEMENTATION
+#include <rtlib.h>
 #include <util/log.h>
 #include <gfx/rgl.h>
 #include <core/window.h>
@@ -21,18 +22,18 @@ static const float vertex_positions[] = {
 
 int main(void) 
 {
-    /* Initialize Platform */
-    int platform_status = rt_init_platform();
-    if (platform_status == 0) {
-        rt_log(fatal, "failed to initialize platform");
+    /* Initialize platform */
+    rt_window_api* win_api = glfw_window_api();
+    if (!win_api->init()) {
+        rt_log(fatal, "failed to initialize platform library");
         exit(EXIT_FAILURE);
     }
-
-    /* Initialize window */
-    void* window = rt_create_window(WIN_INIT_WIDTH, WIN_INIT_HEIGHT, WIN_INIT_TITLE);
-    if (window == NULL) {
+    
+    /* Create window */
+    rt_window* window = win_api->create(WIN_INIT_WIDTH, WIN_INIT_HEIGHT, WIN_INIT_TITLE);
+    if (!window) {
+        win_api->terminate();
         rt_log(fatal, "failed to create window");
-        rt_terminate_platform(); 
         exit(EXIT_FAILURE);
     }
 
@@ -40,8 +41,8 @@ int main(void)
     int gl_version = rgl_init();
     if (gl_version == 0) {
         rt_log(fatal, "failed to load OpenGL");
-        rt_terminate_platform();
-        rt_terminate_window(window);
+        win_api->terminate();
+        win_api->destroy(window);
         exit(EXIT_FAILURE);
     }
             
@@ -71,9 +72,9 @@ int main(void)
     glEnableVertexAttribArray(0);
     
     /* Main Loop */
-    while (!rt_window_should_close(window)) {
+    while (!win_api->should_close(window)) {
         /* Get framebuffer size */
-        rt_ivec2 fb_size = rt_get_framebuffer_size(window);
+        vec2 fb_size = win_api->get_size(window);
         glViewport(0, 0, fb_size.x, fb_size.y);
 
         /* Clear frame */
@@ -90,7 +91,7 @@ int main(void)
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
         /* Draw window */
-        rt_draw_window(window);
+        win_api->draw(window);
     }
 
     /* Cleanup */    
@@ -98,8 +99,8 @@ int main(void)
     glDeleteBuffers(1, &vbo);
     glDeleteProgram(shader);
     rgl_terminate();
-    rt_terminate_window(window);
-    rt_terminate_platform();
+    win_api->destroy(window);
+    win_api->terminate();
 
     return 0;
 }

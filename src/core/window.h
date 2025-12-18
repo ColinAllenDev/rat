@@ -1,30 +1,22 @@
 #ifndef RAT_WINDOW_H
 #define RAT_WINDOW_H
 
-#include <stdint.h>
-
+typedef struct vec2 vec2;
 typedef struct rt_window rt_window;
-typedef struct rt_ivec2 {int x; int y;} rt_ivec2;
 
-/* Initialize platform libraries */
-int rt_init_platform(void);
+/* Function pointer table (vtable) */
+typedef struct rt_window_api {
+	int 		(*init)(void);
+	void 		(*terminate)(void);
+	rt_window* 	(*create)(int, int, const char*);
+	void		(*destroy)(rt_window*);
+	void 		(*draw)(rt_window*);
+	bool		(*should_close)(rt_window*);
+	vec2 		(*get_size)(rt_window*);
+	double		(*get_time)(void);
+} rt_window_api;
 
-/* Terminate platform libraries */
-void rt_terminate_platform(void);
+/* Window backend getters */
+rt_window_api* glfw_window_api(void);
 
-/* Create a platform window */
-rt_window* rt_create_window(int width, int height, const char* title);
-
-/* Terminate a platform window */
-void rt_terminate_window(void* window);
-
-/* Draw platform window */
-void rt_draw_window(void* window);
-
-/* Window closure conditional */
-int rt_window_should_close(void* window);
-
-/* Get window resolution */
-rt_ivec2 rt_get_framebuffer_size(void* window);
-
-#endif /* RAT_WINDOW_H */
+#endif

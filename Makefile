@@ -47,7 +47,7 @@ LDFLAGS = $(LIBS) $(L_GL) $(L_GLFW)
 UNAME := $(shell uname 2>/dev/null || echo Unknown)
 ## MacOS
 ifeq ($(UNAME),Darwin) 
-	L_GLFW := -lglfw3
+	L_GLFW := -lglfw3osx
 	L_GL := -framework Cocoa -framework OpenGL -framework IOKit
 	LIB_EXT := .dylib
 	CFLAGS += -DGL_SILENCE_DEPRECATION
@@ -80,7 +80,7 @@ debug: $(TARGET_DIR)/$(BIN)
 #-- clean: Remove build artifacts
 .PHONY: clean
 clean: 
-	@echo -e "${LOG}Removing build artifacts..."
+	@echo "${LOG}Removing build artifacts..."
 	@rm -rf $(BUILD_DIR)
 
 #-- run: Execute built binary
@@ -96,20 +96,20 @@ run:
 #-- bear: Generate compilation database
 .PHONY: bear
 bear: clean
-	@echo -e "${LOG}Generating compile_commands.json with bear..."
+	@echo "${LOG}Generating compile_commands.json with bear..."
 	@bear -- $(MAKE) -s all
-	@echo -e "${LOG}Compilation database compiled successfully!"
+	@echo "${LOG}Compilation database compiled successfully!"
 
 #-- Linker target
 $(TARGET_DIR)/$(BIN): $(OBJS)
-	@echo -e "${LOG}Linking $@..."
+	@echo "${LOG}Linking $@..."
 	@$(CC) $(OBJS) -o $@ $(LDFLAGS)
-	@echo -e "${LOG}Build completed succesfully!"
+	@echo "${LOG}Build completed succesfully!"
 
 #-- Compilation target
 $(TARGET_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
 	@$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
-	@echo -e "${LOG}Compiled $<" 
+	@echo "${LOG}Compiled $<" 
 
 -include $(DEPS)

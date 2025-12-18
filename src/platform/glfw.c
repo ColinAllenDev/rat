@@ -1,8 +1,8 @@
+#include <rtlib.h>
+#include <core/window.h>
 #include <gfx/rgl.h>
 #include <util/log.h>
-
 #include <stdint.h>
-
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
@@ -17,31 +17,15 @@
 #endif
 /* MacOS specific configuration */
 #if defined(__APPLE__)
-	/* #define GLFW_EXPOSE_NATIVE_COCOA */
-	/* #include "GLFW/glfw3native.h" */
+	#define GLFW_EXPOSE_NATIVE_COCOA
+	#include <GLFW/glfw3native.h>
 #endif
 
-/* Initialize GLFW */
-int ext_init_platform(void);
-
-/* Terminate GLFW */
-void ext_terminate_platform(void);
-
-/* Constructs a GLFW window */
-void* ext_create_window(int width, int height, const char* title); 
-
-/* Deconstructs a GLFW window */
-void ext_terminate_window(void* window); 
-
-/* Draw the window */
-void ext_draw_window(void* window);
-
-/* Returns the close flag of the specified window */
-int ext_window_should_close(void* window);
-
-/* Get framebuffer size */
-typedef struct ext_vec2 {int x; int y;} ext_vec2;
-ext_vec2 ext_get_framebuffer_size(void* window);
+struct rt_window {
+	GLFWwindow* handle;
+	int width;
+	int height;
+};
 
 /* GLFW error callback */
 static void glfw_error_callback(int error, const char* description);
@@ -49,13 +33,9 @@ static void glfw_error_callback(int error, const char* description);
 /* GLFW keyboard input callback */
 static void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-/*
- * Implementation 
- */
-
-int ext_init_platform(void)
+static int glfw_init(void)
 {
-	/* Initialize GLFW */
+	/** Initialize GLFW **/
 	glfwSetErrorCallback(glfw_error_callback);	
 
 	#if defined(__APPLE__)
@@ -67,18 +47,8 @@ int ext_init_platform(void)
 		return 0;
 	}
 
-	return status;
-}
-
-
-void ext_terminate_platform(void)
-{
-	glfwTerminate();
-}
-
-void* ext_create_window(int width, int height, const char* title)
-{
-	/* GLFW Window Hints */
+	/** Configure GLFW **/
+	/* OpenGL Version */
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -86,7 +56,20 @@ void* ext_create_window(int width, int height, const char* title)
     /* Antialiasing (Performance: 4, Quality: 16) */
     glfwWindowHint(GLFW_SAMPLES, 4);
 
-	/* -- GLFW - Window Creation */
+	/* Disable V-Sync by default */
+	glfwSwapInterval(0);
+
+	return status;
+}
+
+static void glfw_terminate(void)
+{
+	glfwTerminate();
+}
+
+static rt_window* glfw_create_window(int width, int height, const char* title)
+{
+	/* Create window */
 	GLFWwindow* window = glfwCreateWindow(width, height, title, NULL, NULL);
 	if (!window) {
 		return NULL;
@@ -99,59 +82,53 @@ void* ext_create_window(int width, int height, const char* title)
 		return NULL;
 	}
 
-	/* -- GLFW - Window Configuration */
-	/* Disable V-Sync by default */
-	glfwSwapInterval(0);
-
-	/* -- GLFW - Window Callbacks */
+	/* Set Input Callback */
 	glfwSetKeyCallback(window, glfw_key_callback);
+	
+	/* Allocate memory for window structure */
+	rt_window* tmp = (rt_window*)malloc(sizeof(rt_window));
 
-	return window;
+	/* Initialize window structure */
+	tmp->handle = window;
+	tmp->width = width;
+	tmp->height = height;
+
+	return tmp;
 }
 
-void* ext_get_window_context(void) 
+static void glfw_destroy_window(rt_window* window) 
 {
-	if (glfwGetCurrentContext() == NULL) {
-		return NULL;
-	}
-	return NULL;
+	glfwDestroyWindow(window->handle);
 }
 
-void ext_terminate_window(void* window) 
+static void glfw_draw_window(rt_window* window)
 {
-	glfwDestroyWindow(window);
-}
-
-void ext_draw_window(void* window)
-{
-	glfwSwapBuffers(window);
+	glfwSwapBuffers(window->handle);
 	glfwPollEvents();
 }
 
-int ext_window_should_close(void* window)
+static bool glfw_should_close(rt_window* window)
 {
-	return glfwWindowShouldClose(window);
+	return glfwWindowShouldClose(window->handle);
 }
 
-ext_vec2 ext_get_framebuffer_size(void* window) 
+static vec2 glfw_get_size(rt_window* window) 
 {
-	ext_vec2 fb_size;
-	glfwGetFramebufferSize(window, &fb_size.x, &fb_size.y);
+	vec2 fb_size;
+	glfwGetFramebufferSize(window->handle, (int*)&fb_size.x, (int*)&fb_size.y);
 	return fb_size;
 }
 
-double ext_get_time(void) 
+static double glfw_get_time(void) 
 {
 	return glfwGetTime();	
 }
 
-/* GLFW - Error Callback */
 static void glfw_error_callback(int err, const char* description) 
 {
 	rt_log(error, "(GLFW | E%i): %s", err, description);	
 }
 
-/* GLFW - Keyboard Callback */
 static void glfw_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	/* Debug log */
@@ -160,4 +137,19 @@ static void glfw_key_callback(GLFWwindow* window, int key, int scancode, int act
     /* Close window callack (ESCAPE) */
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GLFW_TRUE);
+}
+
+static rt_window_api glfw_api = {
+	.init	= glfw_init,
+	.terminate = glfw_terminate,
+	.create = glfw_create_window,
+	.destroy = glfw_destroy_window,
+	.draw = glfw_draw_window,
+	.should_close = glfw_should_close,
+	.get_size = glfw_get_size,
+	.get_time = glfw_get_time
+};
+
+rt_window_api* glfw_window_api(void) {
+	return &glfw_api;
 }
