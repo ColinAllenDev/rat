@@ -7,10 +7,10 @@ in vec4 vertexColor;
 out vec4 fragColor;
 out vec4 fragTexCoord;
 
-uniform mat4 mvp;
+uniform mat4 uMvp;
 
 void main() {
     fragTexCoord = vertexTexCoord;
     fragColor = vertexColor;
-    gl_Position = mvp * vec4(vertexPosition, 1.0);
+    gl_Position = uMvp * vec4(vertexPosition, 1.0);
 }

@@ -1,6 +1,8 @@
 #ifndef RAT_LIB_H
 #define RAT_LIB_H
 
+#include <core/math.h>
+
 /*
 ** Custom free() wrapper that prevents dangling pointers
 */

@@ -40,11 +40,6 @@ int main(void)
     }
             
     /* Shaders */
-    
-    /* Uniforms */
-    int resolution_loc = glGetUniformLocation(shader, "uResolution");
-    int time_loc = glGetUniformLocation(shader, "uTime");
-
     /* Create and bind the vertex array object */
     uint32_t vao, vbo;
     glGenVertexArrays(1, &vao);

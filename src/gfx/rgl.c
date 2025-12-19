@@ -27,7 +27,7 @@ int rgl_init(void)
 		return 0;
 	}
 
-	/* Initialize default shader */
+	/* Initialize default vertex shader */
 	char* default_vs_src = rt_read_file(default_vs_path); 
 	if (!default_vs_src) {
 		rt_free(default_vs_src);
@@ -40,6 +40,7 @@ int rgl_init(void)
 		return 0;
 	}
 
+	/* Initialize default fragment shader */
 	char* default_fs_src = rt_read_file(default_fs_path); 
 	if (!default_fs_src) {
 		rt_free(default_vs_src);
@@ -47,13 +48,14 @@ int rgl_init(void)
 		return 0;
 	}
 
-	uint32_t default_fs_id = compile_shader_source(default_fs_src, GL_VERTEX_SHADER);
+	uint32_t default_fs_id = compile_shader_source(default_fs_src, GL_FRAGMENT_SHADER);
 	if (default_fs_id == 0) {
 		rt_free(default_vs_src);
 		rt_free(default_fs_src);
 		return 0;
 	}
 
+	/* Initialize default shader program */
 	uint32_t default_shader_id  = compile_shader_program(default_vs_id, default_fs_id);
 	if (default_shader_id == 0) {
 		rt_free(default_vs_src);
@@ -61,6 +63,10 @@ int rgl_init(void)
 		return 0;
 	}
 
+	/* Uniforms */
+    int u_mvp = glGetUniformLocation(default_shader_id, "uMvp");
+
+	/* Allocate memory for default shader */
 	default_shader = (rt_shader*)malloc(sizeof(rt_shader));
 	default_shader->id = default_shader_id;
 	default_shader->vs_id = default_vs_id;
@@ -71,6 +77,16 @@ int rgl_init(void)
 
 void rgl_terminate(void) 
 {
+	/* Free default shader */
+	if (default_shader != nullptr) {
+		glDetachShader(default_shader->vs_id, default_shader->id);
+		glDeleteShader(default_shader->vs_id);
+		glDetachShader(default_shader->fs_id, default_shader->id);
+		glDeleteShader(default_shader->fs_id);
+		glDeleteProgram(default_shader->id);
+	}
+
+	/* Unload OpenGL */
 	gladLoaderUnloadGL();
 }
 
